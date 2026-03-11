@@ -1,0 +1,7 @@
+name = "stringg-redirector"
+main = "src/index.ts"
+compatibility_date = "2026-03-12"
+
+[[kv_namespaces]]
+binding = "URL_SHORTENER"
+id = "962157cdcad74afe8d8a7b57bdf4ce6e"
