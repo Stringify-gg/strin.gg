@@ -7,6 +7,7 @@ Stateless URL shortener/redirector for [strinova.gg](https://strinova.gg), runni
 | Pattern | Redirects to |
 |---|---|
 | `/m/<base64>` | `https://strinova.gg/match/<id>` |
+| `/m/<base64>?p=<base64>` | `https://strinova.gg/match/<id>?fromPlayer=<id>` |
 | `/p/<base64>` | `https://strinova.gg/player/<id>` |
 | `/c/<name>` | `https://strinova.gg/creator/<name>` |
 | `/cs/<key>` | `https://strinova.gg/<kv_value>` (CF KV lookup) |
@@ -22,6 +23,8 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_
 ```
 
 For example, `B` → `1`, `BA` → `64`, `CB` → `129`.
+
+The optional `p` query parameter on `/m/` uses the same encoding and is expanded into `fromPlayer`.
 
 ## Development
 

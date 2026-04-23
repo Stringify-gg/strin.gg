@@ -7,6 +7,8 @@ export interface Env {
 }
 
 function b64ToNumber(slug: string): bigint | null {
+  if (slug.length === 0) return null;
+
   let result = 0n;
   for (const char of slug) {
     const idx = BASE.indexOf(char);
@@ -16,10 +18,24 @@ function b64ToNumber(slug: string): bigint | null {
   return result;
 }
 
+function buildMatchRedirectUrl(matchId: bigint, encodedFromPlayer: string | null): string | null {
+  const redirectUrl = new URL(`/match/${matchId}`, FALLBACK);
+
+  if (encodedFromPlayer === null) {
+    return redirectUrl.toString();
+  }
+
+  const fromPlayerId = b64ToNumber(encodedFromPlayer);
+  if (fromPlayerId === null) return null;
+
+  redirectUrl.searchParams.set("fromPlayer", fromPlayerId.toString());
+  return redirectUrl.toString();
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const { pathname } = new URL(request.url);
-    const parts = pathname.split("/").filter(Boolean);
+    const url = new URL(request.url);
+    const parts = url.pathname.split("/").filter(Boolean);
 
     if (parts.length < 2) {
       return Response.redirect(FALLBACK, 302);
@@ -31,8 +47,14 @@ export default {
     if (prefix === "m" || prefix === "p") {
       const id = b64ToNumber(slug);
       if (id === null) return new Response("Bad Request", { status: 400 });
-      const section = prefix === "m" ? "match" : "player";
-      return Response.redirect(`${FALLBACK}/${section}/${id}`, 301);
+
+      if (prefix === "m") {
+        const redirectUrl = buildMatchRedirectUrl(id, url.searchParams.get("p"));
+        if (redirectUrl === null) return new Response("Bad Request", { status: 400 });
+        return Response.redirect(redirectUrl, 301);
+      }
+
+      return Response.redirect(`${FALLBACK}/player/${id}`, 301);
     }
 
     if (prefix === "c") {
