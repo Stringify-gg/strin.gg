@@ -28,7 +28,7 @@ function buildMatchRedirectUrl(matchId: bigint, encodedFromPlayer: string | null
   const fromPlayerId = b64ToNumber(encodedFromPlayer);
   if (fromPlayerId === null) return null;
 
-  return new URL(`/player/${fromPlayerId}/match/${matchId}`, FALLBACK).toString();
+  return new URL(`/share/match/${matchId}/${fromPlayerId}`, FALLBACK).toString();
 }
 
 export default {
@@ -53,17 +53,17 @@ export default {
         return Response.redirect(redirectUrl, 301);
       }
 
-      return Response.redirect(`${FALLBACK}/player/${id}`, 301);
+      return Response.redirect(new URL(`/player/${id}`, FALLBACK).toString(), 301);
     }
 
     if (prefix === "c") {
-      return Response.redirect(`${FALLBACK}/creator/${slug}`, 301);
+      return Response.redirect(new URL(`/creators/${slug}`, FALLBACK).toString(), 301);
     }
 
     if (prefix === "cs") {
       const value = await env.URL_SHORTENER.get(slug);
       if (value === null) return Response.redirect(FALLBACK, 302);
-      return Response.redirect(`${FALLBACK}/${value}`, 301);
+      return Response.redirect(new URL(value, FALLBACK).toString(), 301);
     }
 
     return Response.redirect(FALLBACK, 302);
