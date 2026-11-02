@@ -1,6 +1,6 @@
 # strin.gg
 
-Stateless URL shortener/redirector for [stringify.gg](https://stringify.gg), running on Cloudflare Workers.
+URL shortener/redirector for [stringify.gg](https://stringify.gg), running on Cloudflare Workers. Staff can create short links to any destination from the admin page at `/admin`.
 
 ## Routes
 
@@ -10,9 +10,13 @@ Stateless URL shortener/redirector for [stringify.gg](https://stringify.gg), run
 | `/m/<base64>?p=<base64>` | `https://stringify.gg/share/match/<id>/<player_id>` |
 | `/p/<base64>` | `https://stringify.gg/player/<id>` |
 | `/c/<name>` | `https://stringify.gg/creators/<name>` |
-| `/cs/<key>` | `https://stringify.gg/<kv_value>` (CF KV lookup) |
+| `/<slug>` | stored destination (CF KV lookup, `302`) |
+| `/cs/<key>` | stored destination (CF KV lookup, `302`) |
+| `/admin` | link management page and API (Cloudflare Access only) |
 
-All other paths fall back to `https://stringify.gg` with a `302`.
+`/m/`, `/p/` and `/c/` redirect with `301`. Stored links redirect with `302` so edits take effect.
+Unknown slugs and all other paths fall back to `https://stringify.gg` with a `302`.
+`m`, `p`, `c`, `cs` and `admin` are reserved and cannot be used as slugs.
 
 ## Encoding
 
@@ -32,7 +36,10 @@ client-side navigation continues to the canonical match page.
 
 ```bash
 bun install
+echo 'DEV_ADMIN_EMAIL=you@stringify.gg' > .dev.vars  # admin login on localhost only
 bun run dev
+bun run test
+bun run check
 ```
 
 ## Deployment
@@ -43,10 +50,23 @@ bun run deploy
 
 ## KV Namespace
 
-Custom slugs (`/cs/<key>`) are stored in a Cloudflare KV namespace bound as `URL_SHORTENER`. The value should be a path string (e.g. `tournaments/123`), which gets resolved against `https://stringify.gg/`.
+Short links live in a Cloudflare KV namespace bound as `URL_SHORTENER`. The key is the slug and the value is the destination, resolved against `https://stringify.gg/`: links created from the admin page store an absolute URL, and older hand-written values such as `tournaments/123` keep working. Owner and timestamps are stored as KV metadata.
 
-To add a custom slug:
+Links can still be added by hand:
 
 ```bash
-npx wrangler kv key put --binding URL_SHORTENER "<key>" "<path>"
+npx wrangler kv key put --binding URL_SHORTENER "<key>" "<url or path>"
 ```
+
+## Admin
+
+`/admin` serves a small page backed by a JSON API:
+
+| Method | Path | Does |
+|---|---|---|
+| `GET` | `/admin/api/links?cursor=` | list links, 100 per page |
+| `POST` | `/admin/api/links` | create `{ "url": "...", "slug"?: "..." }`; a random 7-character slug when omitted |
+| `PUT` | `/admin/api/links/<slug>` | change the destination `{ "url": "..." }` |
+| `DELETE` | `/admin/api/links/<slug>` | delete |
+
+Protect `strin.gg/admin` with a Cloudflare Access application and set `ACCESS_TEAM_DOMAIN` (e.g. `team.cloudflareaccess.com`) and `ACCESS_AUD` (the application's audience tag) in `wrangler.toml`. The Worker verifies the `Cf-Access-Jwt-Assertion` header itself and records the signed-in email as the link owner; without both values the admin answers `503`. Writes must be same-origin JSON.

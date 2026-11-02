@@ -1,10 +1,10 @@
+import { handleAdmin, type AdminEnv } from "./admin";
+import { FALLBACK, RESERVED_SLUGS, SLUG_PATTERN, resolveDestination } from "./links";
+
 const BASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 const BASE_SIZE = BigInt(BASE.length);
-const FALLBACK = "https://stringify.gg/";
 
-export interface Env {
-  URL_SHORTENER: KVNamespace;
-}
+export type Env = AdminEnv;
 
 function b64ToNumber(slug: string): bigint | null {
   if (slug.length === 0) return null;
@@ -31,10 +31,27 @@ function buildMatchRedirectUrl(matchId: bigint, encodedFromPlayer: string | null
   return new URL(`/share/match/${matchId}/${fromPlayerId}`, FALLBACK).toString();
 }
 
+// Stored links can be edited, so they redirect with 302 to keep browsers from caching the old target.
+async function redirectToStoredLink(env: Env, key: string): Promise<Response> {
+  const value = await env.URL_SHORTENER.get(key);
+  const destination = value === null ? null : resolveDestination(value);
+  return Response.redirect(destination ?? FALLBACK, 302);
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const parts = url.pathname.split("/").filter(Boolean);
+
+    if (parts[0] === "admin") {
+      return handleAdmin(request, env, parts.slice(1));
+    }
+
+    if (parts.length === 1) {
+      const [slug] = parts;
+      if (RESERVED_SLUGS.has(slug) || !SLUG_PATTERN.test(slug)) return Response.redirect(FALLBACK, 302);
+      return redirectToStoredLink(env, slug);
+    }
 
     if (parts.length < 2) {
       return Response.redirect(FALLBACK, 302);
@@ -61,9 +78,7 @@ export default {
     }
 
     if (prefix === "cs") {
-      const value = await env.URL_SHORTENER.get(slug);
-      if (value === null) return Response.redirect(FALLBACK, 302);
-      return Response.redirect(new URL(value, FALLBACK).toString(), 301);
+      return redirectToStoredLink(env, slug);
     }
 
     return Response.redirect(FALLBACK, 302);
