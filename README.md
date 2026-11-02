@@ -74,5 +74,5 @@ The Worker verifies the `Cf-Access-Jwt-Assertion` header itself and records the 
 ## Cloudflare setup (outside this repo)
 
 1. **Zero Trust → Access → Applications → Add → Self-hosted**: domain `strin.gg`, path `admin` (this covers `/admin/*`). Add an Allow policy for staff (e.g. emails ending in `@stringify.gg`, or a staff group).
-2. Copy the application's **Audience (AUD) tag** and the team domain (**Zero Trust → Settings → Custom Pages**, `<team>.cloudflareaccess.com`) into `ACCESS_AUD` and `ACCESS_TEAM_DOMAIN` in `wrangler.toml`, then `bun run deploy`. `[vars]` in `wrangler.toml` replace dashboard variables on every deploy, so set them here rather than in the dashboard.
+2. Copy the application's **Audience (AUD) tag** and the team domain (**Zero Trust → Settings → Custom Pages**, `<team>.cloudflareaccess.com`) into `ACCESS_AUD` and `ACCESS_TEAM_DOMAIN` in `wrangler.jsonc`, then `bun run deploy`. `vars` in `wrangler.jsonc` replace dashboard variables on every deploy, so set them here rather than in the dashboard.
 3. Make sure the Worker serves `strin.gg/*` (custom domain or route) so `/admin` and the root slugs reach it; no new bindings are needed, the existing `URL_SHORTENER` KV namespace is reused.
