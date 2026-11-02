@@ -101,6 +101,11 @@ describe("admin links API", () => {
     expect(redirect.headers.get("location")).toBe("https://docs.google.com/forms/x");
   });
 
+  test("reports who the admin is signed in as", async () => {
+    expect(await bodyOf(await call("/api/admin/me"))).toEqual({ email: "staff@stringify.gg" });
+    expect((await call("https://strin.gg/api/admin/me")).status).toBe(503);
+  });
+
   test("generates a slug when none is given", async () => {
     const res = await call(LINKS, postJson({ url: "https://example.com/a" }));
     expect(res.status).toBe(201);
@@ -194,7 +199,7 @@ describe("admin page", () => {
   test("entry-server renders the links admin", async () => {
     const { default: ssr } = await import("../app/entry-server.tsx");
     const html = await ssr.fetch(new Request("http://localhost/admin")).text();
-    expect(html).toContain("<h1>strin.gg links</h1>");
+    expect(html).toContain("<h1>New short link</h1>");
     expect(html).toMatch(/<input [^>]*name="url"/);
     expect(html).toMatch(/<input [^>]*name="slug"/);
   });

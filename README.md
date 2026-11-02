@@ -76,6 +76,7 @@ npx wrangler kv key put --binding URL_SHORTENER "links:<slug>" '{"url":"https://
 
 | Method | Path | Does |
 |---|---|---|
+| `GET` | `/api/admin/me` | the signed-in email `{ "email": "..." }` |
 | `GET` | `/api/admin/links` | list all links, newest first |
 | `POST` | `/api/admin/links` | create `{ "url": "...", "slug"?: "..." }`; a random 7-character slug when omitted |
 | `PUT` | `/api/admin/links/<slug>` | change the destination `{ "url": "..." }` |
