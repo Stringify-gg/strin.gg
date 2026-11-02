@@ -1,0 +1,66 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  max-width: 72rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+input {
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+}
+
+input[name="url"] {
+  flex: 1 1 24rem;
+}
+
+button {
+  padding: 0.45rem 0.8rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.4rem;
+  border-bottom: 1px solid #8884;
+  vertical-align: top;
+}
+
+td.dest {
+  word-break: break-all;
+}
+
+td.actions {
+  white-space: nowrap;
+}
+
+.status {
+  min-height: 1.4em;
+}
+
+.error {
+  color: #d33;
+}
+
+.muted {
+  opacity: 0.7;
+  font-size: 0.9em;
+}

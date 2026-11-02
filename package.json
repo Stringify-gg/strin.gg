@@ -1,20 +1,30 @@
 {
-  "name": "stringg-redirector",
-  "version": "1.0.0",
+  "name": "strin-gg",
   "private": true,
-  "packageManager": "bun@latest",
+  "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "test": "bun test",
-    "check": "tsc"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260527.1",
-    "typescript": "^6.0.2",
-    "wrangler": "^4.95.0"
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "vite build && wrangler deploy",
+    "postinstall": "wrangler types",
+    "typecheck": "wrangler types && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "jose": "6.2.13"
+    "jose": "6.2.13",
+    "nitro": "^3.0.261102-rc",
+    "unstorage": "^2.0.0-alpha.10"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.67.0",
+    "@types/node": "^26.6.6",
+    "jiti": "^2.7.0",
+    "nano-jsx": "^0.2.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "5.0.5",
+    "wrangler": "^4.156.2"
   }
 }

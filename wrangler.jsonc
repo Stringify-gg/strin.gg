@@ -1,13 +1,14 @@
 {
   "name": "strin-gg",
-  "main": "src/index.ts",
   "compatibility_date": "2026-03-11",
-
+  // No "main": Nitro writes .output/server/wrangler.json with its own entry,
+  // and `wrangler deploy` picks it up via .wrangler/deploy/config.json.
+  // No trailing commas: Nitro's JSONC parser rejects them.
   "kv_namespaces": [
     {
       "binding": "URL_SHORTENER",
-      "id": "962157cdcad74afe8d8a7b57bdf4ce6e",
-    },
+      "id": "962157cdcad74afe8d8a7b57bdf4ce6e"
+    }
   ],
 
   // Cloudflare Access application guarding strin.gg/admin.
@@ -15,8 +16,8 @@
   // [vars] overwrite dashboard variables on every deploy, so set them here.
   "vars": {
     // <team>.cloudflareaccess.com of the Zero Trust org that owns the app
-    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_TEAM_DOMAIN": "nekolytics.cloudflareaccess.com",
     // AUD tag of the self-hosted Access application for strin.gg/admin
-    "ACCESS_AUD": "",
-  },
+    "ACCESS_AUD": ""
+  }
 }
