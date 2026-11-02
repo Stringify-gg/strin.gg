@@ -69,4 +69,10 @@ npx wrangler kv key put --binding URL_SHORTENER "<key>" "<url or path>"
 | `PUT` | `/admin/api/links/<slug>` | change the destination `{ "url": "..." }` |
 | `DELETE` | `/admin/api/links/<slug>` | delete |
 
-Protect `strin.gg/admin` with a Cloudflare Access application and set `ACCESS_TEAM_DOMAIN` (e.g. `team.cloudflareaccess.com`) and `ACCESS_AUD` (the application's audience tag) in `wrangler.toml`. The Worker verifies the `Cf-Access-Jwt-Assertion` header itself and records the signed-in email as the link owner; without both values the admin answers `503`. Writes must be same-origin JSON.
+The Worker verifies the `Cf-Access-Jwt-Assertion` header itself and records the signed-in email as the link owner; without `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` the admin answers `503`. Writes must be same-origin JSON.
+
+## Cloudflare setup (outside this repo)
+
+1. **Zero Trust → Access → Applications → Add → Self-hosted**: domain `strin.gg`, path `admin` (this covers `/admin/*`). Add an Allow policy for staff (e.g. emails ending in `@stringify.gg`, or a staff group).
+2. Copy the application's **Audience (AUD) tag** and the team domain (**Zero Trust → Settings → Custom Pages**, `<team>.cloudflareaccess.com`) into `ACCESS_AUD` and `ACCESS_TEAM_DOMAIN` in `wrangler.toml`, then `bun run deploy`. `[vars]` in `wrangler.toml` replace dashboard variables on every deploy, so set them here rather than in the dashboard.
+3. Make sure the Worker serves `strin.gg/*` (custom domain or route) so `/admin` and the root slugs reach it; no new bindings are needed, the existing `URL_SHORTENER` KV namespace is reused.
