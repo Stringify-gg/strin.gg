@@ -64,10 +64,13 @@ bun run deploy
 
 Short links live in the Cloudflare KV namespace bound as `URL_SHORTENER`, mounted in Nitro as `url_shortener`. Each link is stored under `links:<slug>` as JSON: `{ "url", "owner", "createdAt", "updatedBy"?, "updatedAt"? }`.
 
-Links can still be added by hand:
+Links can still be added by hand. Wrangler writes to the local dev KV unless you pass `--remote`:
 
 ```bash
-npx wrangler kv key put --binding URL_SHORTENER "links:<slug>" '{"url":"https://…","owner":"you@stringify.gg","createdAt":"2026-01-01T00:00:00.000Z"}'
+# production
+npx wrangler kv key put --remote --binding URL_SHORTENER "links:<slug>" '{"url":"https://…","owner":"you@stringify.gg","createdAt":"2026-01-01T00:00:00.000Z"}'
+# local dev (.wrangler/state)
+npx wrangler kv key put --local --binding URL_SHORTENER "links:<slug>" '{"url":"https://…","owner":"you@stringify.gg","createdAt":"2026-01-01T00:00:00.000Z"}'
 ```
 
 ## Admin
